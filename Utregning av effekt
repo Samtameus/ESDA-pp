@@ -1,0 +1,71 @@
+import numpy as np
+import csv
+
+voltageoutput=3.3
+average_hold_file_names = []
+average_release_file_names = []
+Resistances = [3300, 3300, 120, 120, 120, 120, 120]
+
+for n in range(1,8):
+    average_release_file_names.append("D"+ str(n) + "opp.csv")
+    average_hold_file_names.append("D" + str(n) + "ned.csv")
+
+
+def average(files1):
+    list_of_average=[]
+
+    for n in range(7):
+        with open(files1[n], 'r') as file:
+            data=csv.reader(file)
+            spenninger=[]
+            i=0
+            for rad in data:
+                i+=1
+                if i < 11:
+                    continue
+                spenninger.append(float(rad[1]))
+            average=np.mean(spenninger)
+            list_of_average.append(average)
+    return list_of_average
+average_hold= average(average_hold_file_names)
+average_release=average(average_release_file_names)
+
+
+def Number_power(list):
+    Number_power =[]
+    Number_power.append(list[6])
+    Number_power.append(list[0] + list[5])
+    Number_power.append(list[0] + list[6] + list[5])
+    Number_power.append(list[0] + list[1] + list[4] + list[5])
+    Number_power.append(list[0] + list[1] + list[4] + list[5] + list[6])
+    Number_power.append(list[0] + list[1] + list[2] + list[3] + list[4] + list[5])
+    return Number_power
+
+
+
+power_hold = []
+power_release = []
+
+
+for n in range(7):
+    power_hold.append(average_hold[n]/Resistances[n]*voltageoutput)
+    power_release.append(average_release[n]/Resistances[n]*voltageoutput)
+
+Power_for_each_number=Number_power(power_release)
+
+
+print('Power while Released [W]:')
+for n in range(7):
+    print(f'D{n+1}: {power_release[n]}')
+
+print('\nPower while holding [W]:')
+for n in range(7):
+    print(f'D{n+1}: {power_hold[n]}')
+
+
+print('\nPower for each number [W]:')
+for n in range(6):
+    print(f'{n+1}: {Power_for_each_number[n]}')
+print(f'Average: {sum(Power_for_each_number)/len(Power_for_each_number)}')
+
+print(f'\nAverage power while holding [W]: \n{np.sum(power_hold)}')
